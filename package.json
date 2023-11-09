@@ -1,5 +1,5 @@
 {
-  "name": "jspurefix",
+  "name": "@ncfxutilities/jspurefix",
   "version": "3.0.0-fiat-639-patch",
   "description": "pure node js fix engine",
   "keywords": [
