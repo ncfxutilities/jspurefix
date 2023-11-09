@@ -1,12 +1,12 @@
 import { MsgView } from '../../../buffer'
+import { Dictionary } from '../../../collections'
+import { IJsFixConfig, IJsFixLogger } from '../../../config'
 import { AsciiSession } from '../../../transport'
 import { MsgType } from '../../../types'
 import {
   ITradeCaptureReport, ITradeCaptureReportRequest,
   ITradeCaptureReportRequestAck
 } from '../../../types/FIX4.4/repo'
-import { IJsFixLogger, IJsFixConfig } from '../../../config'
-import { Dictionary } from '../../../collections'
 import { TradeFactory } from './trade-factory'
 
 export class TradeCaptureClient extends AsciiSession {
@@ -71,7 +71,7 @@ export class TradeCaptureClient extends AsciiSession {
     this.logoutTimer()
   }
 
-  protected onLogon (view: MsgView, user: string, password: string): boolean {
+  protected async onLogon (view: MsgView, user: string, password: string): Promise<boolean> {
     this.logger.info(`onLogon user ${user}`)
     return true
   }

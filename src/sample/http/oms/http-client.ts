@@ -1,10 +1,10 @@
-import { FixmlSession } from '../../../transport/fixml'
-import { MsgView } from '../../../buffer'
-import { IJsFixLogger, IJsFixConfig } from '../../../config'
-import { OmsFactory } from './oms-factory'
-import { IExecutionReport, Side } from '../../../types/FIXML50SP2'
 import { inject, injectable } from 'tsyringe'
+import { MsgView } from '../../../buffer'
+import { IJsFixConfig, IJsFixLogger } from '../../../config'
 import { DITokens } from '../../../runtime'
+import { FixmlSession } from '../../../transport/fixml'
+import { IExecutionReport, Side } from '../../../types/FIXML50SP2'
+import { OmsFactory } from './oms-factory'
 
 @injectable()
 export class HttpClient extends FixmlSession {
@@ -45,7 +45,7 @@ export class HttpClient extends FixmlSession {
     this.fixLog.info(txt)
   }
 
-  protected onLogon (view: MsgView, user: string, password: string): boolean {
+  protected async onLogon (view: MsgView, user: string, password: string): Promise<boolean> {
     return true
   }
 

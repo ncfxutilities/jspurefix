@@ -1,7 +1,7 @@
-import { MsgView } from '../../../buffer'
-import { AsciiSession } from '../../../transport'
-import { IJsFixLogger, IJsFixConfig } from '../../../config'
 import { inject, injectable } from 'tsyringe'
+import { MsgView } from '../../../buffer'
+import { IJsFixConfig, IJsFixLogger } from '../../../config'
+import { AsciiSession } from '../../../transport'
 
 @injectable()
 export class SkeletonClient extends AsciiSession {
@@ -36,7 +36,7 @@ export class SkeletonClient extends AsciiSession {
     this.fixLog.info(txt)
   }
 
-  protected onLogon (view: MsgView, user: string, password: string): boolean {
+  protected async onLogon (view: MsgView, user: string, password: string): Promise<boolean> {
     this.logger.info(`peer logs in user ${user}`)
     return true
   }
