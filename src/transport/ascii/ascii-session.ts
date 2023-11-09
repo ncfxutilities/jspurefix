@@ -1,12 +1,12 @@
 import { MsgView } from '../../buffer'
-import { MsgTag, MsgType, SessionRejectReason } from '../../types'
+import { SegmentType } from '../../buffer/segment/segment-type'
 import { IJsFixConfig } from '../../config'
-import { FixSession } from '../session/fix-session'
 import { FixMsgAsciiStoreResend, FixMsgMemoryStore, IFixMsgStore, IFixMsgStoreRecord } from '../../store'
+import { MsgTag, MsgType, SessionRejectReason } from '../../types'
+import { IMsgApplication } from '../msg-application'
+import { FixSession } from '../session/fix-session'
 import { SessionState } from '../tcp'
 import { TickAction } from '../tick-action'
-import { IMsgApplication } from '../msg-application'
-import { SegmentType } from '../../buffer/segment/segment-type'
 
 export abstract class AsciiSession extends FixSession {
   public heartbeat: boolean = true
@@ -21,7 +21,7 @@ export abstract class AsciiSession extends FixSession {
     this.resender = new FixMsgAsciiStoreResend(this.store, this.config)
   }
 
-  private checkSeqNo (msgType: string, view: MsgView): boolean {
+  private async checkSeqNo (msgType: string, view: MsgView): Promise<boolean> {
     switch (msgType) {
       case MsgType.SequenceReset: {
         return true
@@ -42,7 +42,7 @@ export abstract class AsciiSession extends FixSession {
 
           // We process a Logon beforehand to confirm the connection even we out of sync
           if (msgType === MsgType.Logon) {
-            this.peerLogon(view)
+            await this.peerLogon(view)
           }
           // If the out of sync message is a resend request itself, then we handle it first in order
           // to avoid triggering an endless loop of both sides sending resend requests in response to resend requests.
@@ -184,7 +184,7 @@ export abstract class AsciiSession extends FixSession {
     return state === SessionState.InitiationLogonSent
   }
 
-  protected onSessionMsg (msgType: string, view: MsgView): void {
+  protected async onSessionMsg (msgType: string, view: MsgView): Promise<void> {
     const logger = this.sessionLogger
 
     switch (msgType) {
@@ -192,7 +192,7 @@ export abstract class AsciiSession extends FixSession {
         // only valid to receive a logon when in LogonSent or WaitingALogon
         // else will drop connection immediately.
         if (this.okForLogon()) {
-          this.peerLogon(view)
+          await this.peerLogon(view)
         } else {
           this.terminate(new Error(`state ${this.stateString()} is illegal for Logon`))
         }
@@ -284,14 +284,14 @@ export abstract class AsciiSession extends FixSession {
     }, interval)
   }
 
-  private peerLogon (view: MsgView): void {
+  private async peerLogon (view: MsgView): Promise<void> {
     const logger = this.sessionLogger
     const [heartBtInt, peerCompId, userName, password] = view.getTypedTags([MsgTag.HeartBtInt, MsgTag.SenderCompID, MsgTag.Username, MsgTag.Password])
     logger.info(`peerLogon Username = ${userName}, heartBtInt = ${heartBtInt}, peerCompId = ${peerCompId}, userName = ${userName}`)
     const state = this.sessionState
     state.peerHeartBeatSecs = view.getTyped(MsgTag.HeartBtInt)
     state.peerCompId = view.getTyped(MsgTag.SenderCompID)
-    const res = this.onLogon(view, userName, password)
+    const res = await this.onLogon(view, userName, password)
     // currently not using this.
     logger.info(`peerLogon onLogon returns ${res}`)
     if (this.acceptor) {
