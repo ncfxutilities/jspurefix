@@ -1,0 +1,41 @@
+name: Publish package to GitHub Packages
+on:
+    release:
+        types: [created]
+    workflow_dispatch:
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            packages: write
+        steps:
+            - uses: actions/checkout@v3
+            # Setup .npmrc file to publish to GitHub Packages
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: '18.15.0'
+                  registry-url: 'https://npm.pkg.github.com'
+                  # Defaults to the user or organization that owns the workflow file
+                  # scope: '@${GITHUB_REPOSITORY_OWNER}'
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
+            - run: npm i && npm run build
+            - run: npm publish
+            - name: Set env
+              run: |
+                  PACKAGE_VERSION=$(cat package.json \
+                  | grep \"version\" \
+                  | head -1 \
+                  | awk -F: '{ print $2 }' \
+                  | sed 's/[",]//g' \
+                  | tr -d '[[:space:]]')
+                  echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+            - uses: rickstaa/action-create-tag@v1
+              id: 'tag_create'
+              with:
+                  tag: '${{ env.PACKAGE_VERSION }}'
+                  tag_exists_error: false
+                  message: 'Release ${{ env.PACKAGE_VERSION }}'
+            - run: |
+                  echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
