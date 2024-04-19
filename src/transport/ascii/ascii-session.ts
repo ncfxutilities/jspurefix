@@ -62,7 +62,7 @@ export abstract class AsciiSession extends FixSession {
   protected checkForwardMsg (msgType: string, view: MsgView): void {
     const okToForward = this.validStateApplicationMsg()
     if (okToForward) {
-      this.sessionLogger.info(`ascii forwarding msgType = '${msgType}' to application`)
+      this.sessionLogger.debug(`ascii forwarding msgType = '${msgType}' to application`)
       this.setState(SessionState.ActiveNormalSession)
       this.onApplicationMsg(msgType, view)
     } else {
