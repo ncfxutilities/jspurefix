@@ -1,12 +1,12 @@
+import { Server, Socket, createServer as netCreateServer } from 'net'
+import { TLSSocket, TlsOptions, createServer as tlsCreateServer } from 'tls'
+import { inject, injectable } from 'tsyringe'
+import { IJsFixConfig, IJsFixLogger } from '../../config'
+import { DITokens } from '../../runtime/di-tokens'
 import { TcpDuplex } from '../duplex'
 import { MsgTransport } from '../factory'
 import { FixAcceptor } from '../fix-acceptor'
-import { IJsFixConfig, IJsFixLogger } from '../../config'
-import { createServer as netCreateServer, Server, Socket } from 'net'
-import { createServer as tlsCreateServer, TlsOptions, TLSSocket } from 'tls'
 import { TlsOptionsFactory } from './tls-options-factory'
-import { inject, injectable } from 'tsyringe'
-import { DITokens } from '../../runtime/di-tokens'
 
 @injectable()
 export class TcpAcceptor extends FixAcceptor {
@@ -45,14 +45,15 @@ export class TcpAcceptor extends FixAcceptor {
           this.logger.info('enabling tls session trace')
           tlsSocket.enableTrace()
         }
-        if (tlsSocket.authorized) {
+        // Disabled as this implies mutual TLS and we only want basic TLS
+        // if (tlsSocket.authorized) {
           tlsSocket.setEncoding('utf8')
           const id: number = this.getId()
           this.logger.info(`tls creates session ${id} ${tlsSocket.authorized}`)
           this.onSocket(id, tlsSocket, config)
-        } else {
-          this.logger.info('no transport created on tls with no authorized connection')
-        }
+        // } else {
+        //   this.logger.info('no transport created on tls with no authorized connection')
+        // }
       })
     } catch (e) {
       this.logger.error(e)
@@ -82,6 +83,10 @@ export class TcpAcceptor extends FixAcceptor {
   }
 
   private onSocket (id: number, socket: Socket, config: IJsFixConfig): void {
+    if (Object.keys(this.transports).length === 1) {
+      socket.end()
+      return
+    }
     const transport: MsgTransport = new MsgTransport(id, config, new TcpDuplex(socket))
     this.saveTransport(id, transport)
     transport.receiver.on('end', () => {
@@ -108,7 +113,9 @@ export class TcpAcceptor extends FixAcceptor {
   public close (callback?: (err?: Error) => void): void {
     const port = this.config.description.application?.tcp?.port ?? -1
     this.logger.info(`close listener on port ${port}`)
-    this.server.close(callback)
+    if (callback) {
+      callback()
+    }
   }
 
   private saveTransport (tid: number, transport: MsgTransport): void {

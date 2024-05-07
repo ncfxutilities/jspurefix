@@ -1,13 +1,13 @@
 import { ElasticBuffer, MsgView } from '../../buffer'
-import { IJsFixConfig, IJsFixLogger } from '../../config'
-import { FixSessionState } from './fix-session-state'
-import { MsgTransport } from '../factory'
-import { MsgTag } from '../../types'
 import { ILooseObject } from '../../collections/collection'
+import { IJsFixConfig, IJsFixLogger } from '../../config'
+import { MsgTag } from '../../types'
+import { MsgTransport } from '../factory'
+import { FixSessionState } from './fix-session-state'
 
 import * as events from 'events'
-import { SessionState } from './session-state'
 import { SegmentType } from '../../buffer/segment/segment-type'
+import { SessionState } from './session-state'
 
 export abstract class FixSession extends events.EventEmitter {
   public logReceivedMsgs: boolean = false
@@ -418,5 +418,5 @@ export abstract class FixSession extends events.EventEmitter {
   // inform application this session has now ended - either from logout or connection dropped
   protected abstract onStopped (error?: Error): void
   // does the application accept the inbound logon request
-  protected abstract onLogon (view: MsgView, user: string, password: string): boolean
+  protected abstract onLogon (view: MsgView, user: string, password: string): Promise<boolean>
 }

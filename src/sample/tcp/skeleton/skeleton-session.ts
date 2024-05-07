@@ -1,10 +1,10 @@
-import { MsgView } from '../../../buffer'
-import { AsciiSession } from '../../../transport'
-import { IJsFixLogger, IJsFixConfig } from '../../../config'
-import { ILooseObject } from '../../../collections/collection'
-import { FixMsgStoreRecord } from '../../../store'
 import { inject, injectable } from 'tsyringe'
+import { MsgView } from '../../../buffer'
+import { ILooseObject } from '../../../collections/collection'
+import { IJsFixConfig, IJsFixLogger } from '../../../config'
 import { DITokens } from '../../../runtime'
+import { FixMsgStoreRecord } from '../../../store'
+import { AsciiSession } from '../../../transport'
 
 @injectable()
 export class SkeletonSession extends AsciiSession {
@@ -59,7 +59,7 @@ export class SkeletonSession extends AsciiSession {
     this.fixLog.info(txt)
   }
 
-  protected onLogon (view: MsgView, user: string, password: string): boolean {
+  protected async onLogon (view: MsgView, user: string, password: string): Promise<boolean> {
     this.logger.info(`peer logs in user ${user}`)
     return true
   }

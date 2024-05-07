@@ -68,7 +68,7 @@ dist/
 # idea folder
 .idea/
 
-data/fix_repo
+# data/fix_repo
 /jsfix.test_client.txt
 /jsfix.test_server.txt
 /tags

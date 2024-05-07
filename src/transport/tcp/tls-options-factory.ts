@@ -1,14 +1,11 @@
 import { ConnectionOptions, TlsOptions } from 'tls'
-import { ITlsOptions } from './tls-options'
 import { ITcpTransportDescription } from './tcp-transport-description'
-const path = require('path')
+import { ITlsOptions } from './tls-options'
 const fs = require('fs')
 
 export class TlsOptionsFactory {
   static read (filePath: string): string {
-    const root: string = path.join(__dirname, '../../../')
-    const fullPath = path.join(root, filePath)
-    return fs.readFileSync(fullPath,
+    return fs.readFileSync(filePath,
       {
         encoding: 'utf8', flag: 'r'
       })
@@ -17,10 +14,7 @@ export class TlsOptionsFactory {
   static getTlsOptions (tls: ITlsOptions): TlsOptions | null {
     let tlsOptions: TlsOptions | null = null
     if (tls) {
-      tlsOptions = {
-        requestCert: tls.requestCert,
-        rejectUnauthorized: tls.rejectUnauthorized
-      } as TlsOptions
+      tlsOptions = { ...tls }
 
       if (tls.key) {
         tlsOptions.key = TlsOptionsFactory.read(tls.key)
@@ -47,8 +41,9 @@ export class TlsOptionsFactory {
     if (tls) {
       connectionOptions = {
         port: tcp.port,
-        host: tcp.host
-      } as ConnectionOptions
+        host: tcp.host,
+        ...tls
+      }
       if (tls.key) {
         connectionOptions.key = TlsOptionsFactory.read(tcp.tls?.key ?? '')
         connectionOptions.cert = tcp.tls?.cert ? TlsOptionsFactory.read(tcp?.tls?.cert) : undefined

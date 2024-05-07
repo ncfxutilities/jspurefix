@@ -1,6 +1,6 @@
 {
-  "name": "jspurefix",
-  "version": "3.1.0",
+  "name": "@ncfxutilities/jspurefix",
+  "version": "3.0.0-1.0.3",
   "description": "pure node js fix engine",
   "keywords": [
     "typescript",

@@ -1,11 +1,11 @@
 import { MsgView } from '../../../buffer'
+import { IJsFixConfig, IJsFixLogger } from '../../../config'
 import { AsciiSession } from '../../../transport'
 import { MsgType } from '../../../types'
-import { IJsFixLogger, IJsFixConfig } from '../../../config'
 
-import { MDFactory } from './md-factory'
 import { inject, injectable } from 'tsyringe'
 import { DITokens } from '../../../runtime'
+import { MDFactory } from './md-factory'
 
 @injectable()
 export class MDClient extends AsciiSession {
@@ -48,7 +48,7 @@ export class MDClient extends AsciiSession {
     }, logoutSeconds * 1000)
   }
 
-  protected onLogon (view: MsgView, user: string, password: string): boolean {
+  protected async onLogon (view: MsgView, user: string, password: string): Promise<boolean> {
     return true
   }
 }

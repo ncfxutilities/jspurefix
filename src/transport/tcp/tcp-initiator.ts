@@ -1,18 +1,18 @@
 
-import { FixInitiator } from '../fix-initiator'
 import { MsgTransport } from '../factory'
+import { FixInitiator } from '../fix-initiator'
 
 import { IJsFixConfig, IJsFixLogger } from '../../config'
-import { TcpDuplex, FixDuplex } from '../duplex'
+import { FixDuplex, TcpDuplex } from '../duplex'
 
-import * as util from 'util'
-import { connect as tlsConnect, ConnectionOptions, TLSSocket } from 'tls'
 import { createConnection } from 'net'
-import Timeout = NodeJS.Timeout
-import { TlsOptionsFactory } from './tls-options-factory'
+import { ConnectionOptions, TLSSocket, connect as tlsConnect } from 'tls'
 import { inject, injectable } from 'tsyringe'
+import * as util from 'util'
 import { DITokens } from '../../runtime/di-tokens'
 import { ITcpTransportDescription } from './tcp-transport-description'
+import { TlsOptionsFactory } from './tls-options-factory'
+import Timeout = NodeJS.Timeout
 
 export enum InitiatorState {
   Idle = 1,
@@ -123,13 +123,15 @@ export class TcpInitiator extends FixInitiator {
         try {
           tlsSocket = tlsConnect(connectionOptions, () => {
             if (!tlsSocket) return null
-            this.logger.info(`client connected ${tlsSocket.authorized ? 'authorized' : 'unauthorized'}`)
-            if (!tlsSocket.authorized) {
-              const error = tlsSocket.authorizationError
-              this.logger.warning(`rejecting from state ${this.state} authorizationError ${error}`)
-              tlsSocket.end()
-              reject(error)
-            } else {
+            this.logger.info('client connected')
+            // this.logger.info(`client connected ${tlsSocket.authorized ? 'authorized' : 'unauthorized'}`)
+            // Disabled as this implies mutual TLS and we only want basic TLS
+            // if (!tlsSocket.authorized) {
+            //   const error = tlsSocket.authorizationError
+            //   this.logger.warning(`rejecting from state ${this.state} authorizationError ${error}`)
+            //   tlsSocket.end()
+            //   reject(error)
+            // } else {
               tlsSocket.setEncoding('utf8')
               const tlsDuplex = new TcpDuplex(tlsSocket)
               if (tcp?.tls?.enableTrace) {
@@ -138,7 +140,7 @@ export class TcpInitiator extends FixInitiator {
               }
               this.logger.info('tlsDuplex resolving')
               resolve(tlsDuplex)
-            }
+            // }
           })
           tlsSocket.on('error', (err) => {
             reject(err)
