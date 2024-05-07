@@ -15,7 +15,7 @@ export class TradeCaptureServer extends AsciiSession {
   private readonly logger: IJsFixLogger
   private readonly fixLog: IJsFixLogger
   private readonly tradeFactory: TradeFactory = new TradeFactory()
-  private timerHandle: NodeJS.Timer | null = null
+  private timerHandle: NodeJS.Timeout | null = null
 
   constructor (public readonly config: IJsFixConfig) {
     super(config)
@@ -28,7 +28,7 @@ export class TradeCaptureServer extends AsciiSession {
     this.logger.info(`${view.toJson()}`)
     switch (msgType) {
       case MsgType.TradeCaptureReportRequest: {
-        this.tradeCaptureReportRequest(view.toObject())
+        this.tradeCaptureReportRequest(view!.toObject() as ITradeCaptureReportRequest)
         break
       }
 
